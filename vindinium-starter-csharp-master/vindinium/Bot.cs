@@ -7,16 +7,16 @@ using System.Threading.Tasks;
 
 namespace vindinium
 {
-	public class bot
+	class Bot
 	{
-		private ServerStuff serveurStuff;
+		private ServerStuff serverStuff;
 
 		/**
 		 * Constructeur
 		 **/
-		public bot (ServerStuff serveurStuff)
+		public Bot (ServerStuff serveurStuff)
 		{
-			this.serveurStuff = serveurStuff;
+			this.serverStuff = serveurStuff;
 		}
 
 
@@ -38,41 +38,40 @@ namespace vindinium
 						System.Diagnostics.Process.Start(serverStuff.viewURL);
 					}).Start();
 			}
-
+			Random random = new Random ();
 			while (serverStuff.finished == false && serverStuff.errored == false)
 			{
-//				switch(random.Next(0, 6))
-//				{
-//				case 0:
-//					serverStuff.moveHero(Direction.East);
-//					break;
-//				case 1:
-//					serverStuff.moveHero(Direction.North);
-//					break;
-//				case 2:
-//					serverStuff.moveHero(Direction.South);
-//					break;
-//				case 3:
-//					serverStuff.moveHero(Direction.Stay);
-//					break;
-//				case 4:
-//					serverStuff.moveHero(Direction.West);
-//					break;
-//				}
+				switch(random.Next(0, 6))
+				{
+				case 0:
+					serverStuff.moveHero(Direction.East);
+					break;
+				case 1:
+					serverStuff.moveHero(Direction.North);
+					break;
+				case 2:
+					serverStuff.moveHero(Direction.South);
+					break;
+				case 3:
+					serverStuff.moveHero(Direction.Stay);
+					break;
+				case 4:
+					serverStuff.moveHero(Direction.West);
+					break;
+				}
 
 				Console.Out.WriteLine("completed turn " + serverStuff.currentTurn);
 			}
 
-			if (serverStuff.errored)
+				if (serverStuff.errored)
 			{
-				Console.Out.WriteLine("error: " + serverStuff.errorText);
+					Console.Out.WriteLine("error: " + serverStuff.errorText);
 			}
 
 			Console.Out.WriteLine("Poly_morphisme a fini");
 		}
 
 
-		}
 	}
 }
 

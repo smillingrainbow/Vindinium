@@ -24,8 +24,8 @@ namespace vindinium
             ServerStuff serverStuff = new ServerStuff(args[0], args[1] != "arena", uint.Parse(args[2]), serverURL, null);
 
             //create the random bot, replace this with your own bot
-            RandomBot bot = new RandomBot(serverStuff);
-
+			//RandomBot bot = new RandomBot(serverStuff);
+			Bot bot = new Bot(serverStuff);
             //now kick it all off by running the bot.
             bot.run();
 
