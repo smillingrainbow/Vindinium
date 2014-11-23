@@ -5,11 +5,17 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Collections;
+
 namespace vindinium
 {
     class Bot
     {
         private ServerStuff serverStuff;
+        private int nbBiereDispo;
+        private int nbMinesDispo;
+        private List<Pos> bieresDispo;
+        private List<Pos> minesDispo;
+
 
         /**
          * Constructeur
@@ -71,6 +77,9 @@ namespace vindinium
 
             Console.Out.WriteLine("Poly_morphisme a fini");
         }
+
+
+
 
         public int AStar(Pos posHero, Pos posDestination)
         {
@@ -289,5 +298,144 @@ namespace vindinium
         {
             return arrive.x - posCourante.x + arrive.y - posCourante.y;
         }
+
+
+
+         public void initMines(){
+             this.minesDispo.Clear();
+             this.nbMinesDispo = 0;
+             Pos objetTrouve = new Pos();
+
+             if (serverStuff.myHero.id == 1)
+             {
+                 for (int i = 0; i < serverStuff.board.Length; i++)
+                 {
+                     for (int j = 0; j < serverStuff.board.Length; j++)
+                     {
+                         if (serverStuff.board[i][j] == Tile.GOLD_MINE_NEUTRAL ||
+                             serverStuff.board[i][j] == Tile.GOLD_MINE_2 ||
+                             serverStuff.board[i][j] == Tile.GOLD_MINE_3 ||
+                             serverStuff.board[i][j] == Tile.GOLD_MINE_4 )
+                         {
+                             this.nbMinesDispo++;
+                             objetTrouve.x = i;
+                             objetTrouve.y = j;
+                             minesDispo.Add(objetTrouve);
+                         }
+                     }
+                 }
+             }
+
+              if (serverStuff.myHero.id == 2)
+             {
+                 for (int i = 0; i < serverStuff.board.Length; i++)
+                 {
+                     for (int j = 0; j < serverStuff.board.Length; j++)
+                     {
+                         if (serverStuff.board[i][j] == Tile.GOLD_MINE_NEUTRAL ||
+                             serverStuff.board[i][j] == Tile.GOLD_MINE_1 ||
+                             serverStuff.board[i][j] == Tile.GOLD_MINE_3 ||
+                             serverStuff.board[i][j] == Tile.GOLD_MINE_4 )
+                         {
+                             this.nbMinesDispo++;
+                             objetTrouve.x = i;
+                             objetTrouve.y = j;
+                             minesDispo.Add(objetTrouve);
+                         }
+                     }
+                 }
+             }
+
+              if (serverStuff.myHero.id == 3)
+             {
+                 for (int i = 0; i < serverStuff.board.Length; i++)
+                 {
+                     for (int j = 0; j < serverStuff.board.Length; j++)
+                     {
+                         if (serverStuff.board[i][j] == Tile.GOLD_MINE_NEUTRAL ||
+                             serverStuff.board[i][j] == Tile.GOLD_MINE_1 ||
+                             serverStuff.board[i][j] == Tile.GOLD_MINE_2 ||
+                             serverStuff.board[i][j] == Tile.GOLD_MINE_4 )
+                         {
+                             this.nbMinesDispo++;
+                             objetTrouve.x = i;
+                             objetTrouve.y = j;
+                             minesDispo.Add(objetTrouve);
+                         }
+                     }
+                 }
+             }
+
+              if (serverStuff.myHero.id == 4)
+             {
+                 for (int i = 0; i < serverStuff.board.Length; i++)
+                 {
+                     for (int j = 0; j < serverStuff.board.Length; j++)
+                     {
+                         if (serverStuff.board[i][j] == Tile.GOLD_MINE_NEUTRAL ||
+                             serverStuff.board[i][j] == Tile.GOLD_MINE_1 ||
+                             serverStuff.board[i][j] == Tile.GOLD_MINE_2 ||
+                             serverStuff.board[i][j] == Tile.GOLD_MINE_3 )
+                         {
+                             this.nbMinesDispo++;
+                             objetTrouve.x = i;
+                             objetTrouve.y = j;
+                             minesDispo.Add(objetTrouve);
+                         }
+                     }
+                 }
+             }
+              trieList(minesDispo, nbMinesDispo);
+         }
+
+
+         public void nbBieres()
+         {
+             this.nbBiereDispo = 0;
+             this.bieresDispo.Clear();
+             Pos objetTrouve = new Pos();
+
+             for (int i = 0; i < serverStuff.board.Length; i++)
+             {
+                 for (int j = 0; j < serverStuff.board.Length; j++)
+                 {
+                     if (serverStuff.board[i][j] == Tile.TAVERN)
+                     {
+                         nbBiereDispo++;
+                         objetTrouve.x = i;
+                         objetTrouve.y = i;
+                         bieresDispo.Add(objetTrouve);
+                     }
+                 }
+             }
+             trieList(bieresDispo, nbBiereDispo);
+         }
+
+
+         public void trieList(List<Pos> liste, int nombreObjet)
+         {
+             Pos objetTemp = new Pos();
+             for (int i = 0; i < nombreObjet; i++)
+             {
+                 for (int j = 0; j < nombreObjet; i++)
+                 {
+                     if( (i != j) &&
+                         ((Math.Abs(liste[i].x - serverStuff.myHero.pos.x) + (Math.Abs(liste[i].y - serverStuff.myHero.pos.y))) < 
+                          (Math.Abs(liste[j].x - serverStuff.myHero.pos.x) + (Math.Abs(liste[j].y - serverStuff.myHero.pos.y))))
+                          ){
+                         // objetTemp = liste[i];
+                         objetTemp.x = liste[i].x;
+                         objetTemp.y = liste[i].y;
+                         // liste[i] = liste[j];
+                         liste[i].x = liste[j].x;
+                         liste[i].y = liste[j].y;
+                         // liste[j] = objetTemp;
+                         liste[j].x = objetTemp.x;
+                         liste[j].y = objetTemp.y;
+                     }
+                 }
+             }
+         }
+
     }
 }
