@@ -389,6 +389,84 @@ namespace vindinium
          }
 
 
+        public void initEnnemis()
+         {
+              Pos objetTrouve = new Pos();
+
+             if (serverStuff.myHero.id == 1)
+             {
+                 for (int i = 0; i < serverStuff.board.Length; i++)
+                 {
+                     for (int j = 0; j < serverStuff.board.Length; j++)
+                     {
+                         if (serverStuff.board[i][j] == Tile.HERO_2 ||
+                             serverStuff.board[i][j] == Tile.HERO_3 ||
+                             serverStuff.board[i][j] == Tile.HERO_4)
+                         {
+                             objetTrouve.x = i;
+                             objetTrouve.y = j;
+                             ennemisDispo.Add(objetTrouve);
+                         }
+                     }
+                 }
+             }
+
+             if (serverStuff.myHero.id == 2)
+             {
+                 for (int i = 0; i < serverStuff.board.Length; i++)
+                 {
+                     for (int j = 0; j < serverStuff.board.Length; j++)
+                     {
+                         if (serverStuff.board[i][j] == Tile.HERO_1 ||
+                             serverStuff.board[i][j] == Tile.HERO_3 ||
+                             serverStuff.board[i][j] == Tile.HERO_4)
+                         {
+                             objetTrouve.x = i;
+                             objetTrouve.y = j;
+                             ennemisDispo.Add(objetTrouve);
+                         }
+                     }
+                 }
+             }
+
+             if (serverStuff.myHero.id == 3)
+             {
+                 for (int i = 0; i < serverStuff.board.Length; i++)
+                 {
+                     for (int j = 0; j < serverStuff.board.Length; j++)
+                     {
+                         if (serverStuff.board[i][j] == Tile.HERO_1 ||
+                             serverStuff.board[i][j] == Tile.HERO_2 ||
+                             serverStuff.board[i][j] == Tile.HERO_4)
+                         {
+                             objetTrouve.x = i;
+                             objetTrouve.y = j;
+                             ennemisDispo.Add(objetTrouve);
+                         }
+                     }
+                 }
+             }
+
+             if (serverStuff.myHero.id == 4)
+             {
+                 for (int i = 0; i < serverStuff.board.Length; i++)
+                 {
+                     for (int j = 0; j < serverStuff.board.Length; j++)
+                     {
+                         if (serverStuff.board[i][j] == Tile.HERO_1 ||
+                             serverStuff.board[i][j] == Tile.HERO_2 ||
+                             serverStuff.board[i][j] == Tile.HERO_3)
+                         {
+                             objetTrouve.x = i;
+                             objetTrouve.y = j;
+                             minesDispo.Add(objetTrouve);
+                         }
+                     }
+                 }
+             }
+             trieList(ennemisDispo, 3);
+         }
+
          public void nbBieres()
          {
              this.nbBiereDispo = 0;
