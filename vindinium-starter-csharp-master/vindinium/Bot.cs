@@ -11,8 +11,12 @@ namespace vindinium
     class Bot
     {
         private ServerStuff serverStuff;
+
+        // Variables qui détermine le nb de bière et de mines sur la cartes
         private int nbBiereDispo;
         private int nbMinesDispo;
+
+        // Liste des positions des différentes bières/mines/ennemis
         private List<Pos> bieresDispo = new List<Pos>();
         private List<Pos> minesDispo  = new List<Pos>(); 
         private List<Pos> ennemisDispo = new List<Pos>();
@@ -46,12 +50,16 @@ namespace vindinium
                 }).Start();
             }
 
+            // La variable deplacement correspond au deplacement de notre hero durant notre tour
             string deplacement = Direction.Stay;
+            // Suite Deplacement est la liste des déplacement d'un hero vers son objectif
             List<string> SuiteDeplacement = new List<String>();
 
+            // Si il n'y a pas d'ennemis autour de notre hero
             if(EnnemisACoté() == null){
                 ContinuFuir = false;
-               if(Continu == false){
+                if(Continu == false){
+                    // Si la vie du hero est supérieure ou égale à 40, on va chercher la mine la plus proche
                     if (serverStuff.myHero.life >= 40)
                   {
                         initMines();
@@ -71,10 +79,12 @@ namespace vindinium
                }
             }
            else{
+                // Si la vie du héro est supérieur ou égale à 80, on va taper l'adversaire
                 if(serverStuff.myHero.life >= 80){
                         SuiteDeplacement = AStar(serverStuff.myHero.pos, EnnemisACoté());
                         deplacement = SuiteDeplacement[0];
                 }
+                // Sinon, on fuit vers la bière la plus proche
                 else{
                     if(!ContinuFuir){
                         initBieres();
@@ -90,37 +100,10 @@ namespace vindinium
                
             }
            
-               Continu = true;
-               ContinuFuir = true;
-              serverStuff.moveHero(deplacement);
-
-
-
-
-            //Random random = new Random();
-            //while (serverStuff.finished == false && serverStuff.errored == false)
-            //{
-            //    switch (random.Next(0, 6))
-            //    {
-            //        case 0:
-            //            serverStuff.moveHero(Direction.East);
-            //            break;
-            //        case 1:
-            //            serverStuff.moveHero(Direction.North);
-            //            break;
-            //        case 2:
-            //            serverStuff.moveHero(Direction.South);
-            //            break;
-            //        case 3:
-            //            serverStuff.moveHero(Direction.Stay);
-            //            break;
-            //        case 4:
-            //            serverStuff.moveHero(Direction.West);
-            //            break;
-            //    }
-
-            //    Console.Out.WriteLine("completed turn " + serverStuff.currentTurn);
-            //}
+            // On bouge le héro
+            Continu = true;
+            ContinuFuir = true;
+            serverStuff.moveHero(deplacement);
 
             if (serverStuff.errored)
             {
@@ -131,72 +114,14 @@ namespace vindinium
         }
 
 
-        // Tu va retourner la position du méchant!
-
+        // Retourne l'ennemis à coté si il existe
         public Pos EnnemisACoté()
         {
-            
-            Pos ennemis = new Pos();
-            
-                if (serverStuff.myHero.id == 1){
-                   for (int i = -2; i < 3; i++)
-                   {
-                        for(int j = -2 ; j<3; j++){
-                            if(((serverStuff.board[serverStuff.myHero.pos.x + i ][serverStuff.myHero.pos.y + j])== Tile.HERO_2) ||
-                                ((serverStuff.board[serverStuff.myHero.pos.x + i ][serverStuff.myHero.pos.y + j])== Tile.HERO_3) ||
-                                ((serverStuff.board[serverStuff.myHero.pos.x + i ][serverStuff.myHero.pos.y] + j)== Tile.HERO_4))
-                                 // Ennemis = true;
-                                ennemis.x = serverStuff.myHero.pos.x + i;
-                                ennemis.y = serverStuff.myHero.pos.y + j;
-                        }
-                    }     
-                }  
-
-                if(serverStuff.myHero.id == 2){
-                    for (int i = -2; i < 3; i++)
-                   {
-                        for(int j = -2 ; j<3; j++){
-                            if(((serverStuff.board[serverStuff.myHero.pos.x + i ][serverStuff.myHero.pos.y + j])== Tile.HERO_1) ||
-                                ((serverStuff.board[serverStuff.myHero.pos.x + i ][serverStuff.myHero.pos.y + j])== Tile.HERO_3) ||
-                                ((serverStuff.board[serverStuff.myHero.pos.x + i ][serverStuff.myHero.pos.y] + j)== Tile.HERO_4))
-                                  //Ennemis = true;
-                            ennemis.x = serverStuff.myHero.pos.x + i;
-                            ennemis.y = serverStuff.myHero.pos.y + j;
-                        }
-                    }     
-                }  
- 
-
-                if(serverStuff.myHero.id == 3){
-                   for (int i = -2; i < 3; i++)
-                   {
-                        for(int j = -2 ; j<3; j++){
-                            if(((serverStuff.board[serverStuff.myHero.pos.x + i ][serverStuff.myHero.pos.y + j])== Tile.HERO_1) ||
-                                ((serverStuff.board[serverStuff.myHero.pos.x + i ][serverStuff.myHero.pos.y + j])== Tile.HERO_2) ||
-                                ((serverStuff.board[serverStuff.myHero.pos.x + i ][serverStuff.myHero.pos.y] + j)== Tile.HERO_4))
-                                  //Ennemis = true;
-                            ennemis.x = serverStuff.myHero.pos.x + i;
-                            ennemis.y = serverStuff.myHero.pos.y + j;
-                        }
-                    }     
-                }  
-
-
-                if(serverStuff.myHero.id == 4){
-                   for (int i = -2; i < 3; i++)
-                   {
-                        for(int j = -2 ; j<3; j++){
-                            if(((serverStuff.board[serverStuff.myHero.pos.x + i ][serverStuff.myHero.pos.y + j])== Tile.HERO_1) ||
-                                ((serverStuff.board[serverStuff.myHero.pos.x + i ][serverStuff.myHero.pos.y + j])== Tile.HERO_2) ||
-                                ((serverStuff.board[serverStuff.myHero.pos.x + i ][serverStuff.myHero.pos.y] + j)== Tile.HERO_3))
-                                 // Ennemis = true;
-                            ennemis.x = serverStuff.myHero.pos.x + i;
-                            ennemis.y = serverStuff.myHero.pos.y + j;
-                        }
-                    }     
-                }  
-
-            return ennemis;
+            for(int i = 1 ; i < 5 ; i++){
+               if((i != serverStuff.myHero.id) && (serverStuff.myHero.pos.x - serverStuff.heroes[i-1].pos.x + serverStuff.myHero.pos.y - serverStuff.heroes[i-1].pos.y) <= 2)
+                    return serverStuff.heroes[i].pos;
+             }  
+             return null;
         }
 
 
@@ -207,16 +132,18 @@ namespace vindinium
             Pos posEnCours = new Pos();
             int index;
             int[][][] tableParent = new int[serverStuff.board.Length][][];
-
             int[][][] tableDistance = new int[serverStuff.board.Length][][] ;
+           
             for (int i = 0; i < serverStuff.board.Length; i++)
             {
                 tableDistance[i] = new int[serverStuff.board.Length][];
                 tableParent[i] = new int[serverStuff.board.Length][];
-                for (int j = 0; i < serverStuff.board.Length; i++)
+
+                for (int j = 0; j < serverStuff.board.Length; j++)
                 {
                     tableDistance[i][j] = new int[2];
                     tableParent[i][j] = new int[2];
+
                     for (int k = 0; k < 2; k++)
                     {
                         tableDistance[i][j][k] = 0;
@@ -261,8 +188,7 @@ namespace vindinium
                             tableParent[posDroite.x][posDroite.y][0] = listeFerme[(listeFerme.Count) - 1].x;
                             tableParent[posDroite.x][posDroite.y][0] = listeFerme[(listeFerme.Count) - 1].y;
                         }
-                    }
-                  
+                    }     
                 }
 
                 if (serverStuff.board[listeFerme[(listeFerme.Count) - 1].x - 1][listeFerme[(listeFerme.Count) - 1].y] != Tile.IMPASSABLE_WOOD)
@@ -633,13 +559,15 @@ namespace vindinium
          public void trieList(List<Pos> liste, int nombreObjet)
          {
              Pos objetTemp = new Pos();
+             objetTemp.x = 9999;
+             objetTemp.y = 9999;
              for (int i = 0; i < nombreObjet; i++)
              {
                  for (int j = 0; j < nombreObjet; i++)
                  {
                      if( (i != j) &&
-                         ((Math.Abs(liste[i].x - serverStuff.myHero.pos.x) + (Math.Abs(liste[i].y - serverStuff.myHero.pos.y))) < 
-                          (Math.Abs(liste[j].x - serverStuff.myHero.pos.x) + (Math.Abs(liste[j].y - serverStuff.myHero.pos.y)))
+                         ((Math.Abs(liste[i].x - serverStuff.myHero.pos.x) + (Math.Abs(liste[i].y - serverStuff.myHero.pos.y))) <
+                          (Math.Abs(liste[j].x - objetTemp.x) + (Math.Abs(liste[j].y - objetTemp.y)))
                           )){
                          // objetTemp = liste[i];
                          objetTemp.x = liste[i].x;
@@ -653,10 +581,6 @@ namespace vindinium
                      }
                  }
              }
-         }
-    
-        
-
-    
+         }    
     }
 }
