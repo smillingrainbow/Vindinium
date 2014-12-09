@@ -53,7 +53,7 @@ namespace vindinium
             // La variable deplacement correspond au deplacement de notre hero durant notre tour
             string deplacement = Direction.Stay;
             // Suite Deplacement est la liste des déplacement d'un hero vers son objectif
-            List<string> SuiteDeplacement = new List<String>();
+            List<string> SuiteDeplacement = new List<string>();
 
             // Si il n'y a pas d'ennemis autour de notre hero
             if(EnnemisACoté() == null){
@@ -125,12 +125,13 @@ namespace vindinium
         }
 
 
-        public List<String> AStar(Pos posHero, Pos posDestination)
+        public List<string> AStar(Pos posHero, Pos posDestination)
         {
             List<Pos> listeOuverte = new List<Pos>();
             List<Pos> listeFerme = new List<Pos>();
             Pos posEnCours = new Pos();
             int index;
+            bool continu = true;
             int[][][] tableParent = new int[serverStuff.board.Length][][];
             int[][][] tableDistance = new int[serverStuff.board.Length][][] ;
            
@@ -160,20 +161,23 @@ namespace vindinium
             tableDistance[posHero.x][posHero.y][1] = (int)getDistanceReelle(posHero,posDestination);
            
 
-            while ((listeOuverte.Count != 0) && (listeFerme[(listeFerme.Count) - 1].x == posDestination.x) && (listeFerme[(listeFerme.Count) - 1].y == posDestination.y))
+            while (continu == true)
             {
                 index = retournerPlusPetitNoeud(listeOuverte, tableDistance);
                 listeFerme.Add(listeOuverte[index]);
                 listeOuverte.RemoveAt(index);
 
+                // On regarde si on à des arbre
                 if (serverStuff.board[listeFerme[(listeFerme.Count) - 1].x + 1][listeFerme[(listeFerme.Count) - 1].y] != Tile.IMPASSABLE_WOOD)
                 {
                     Pos posDroite = new Pos();
                     posDroite.x = listeFerme[(listeFerme.Count) - 1].x + 1;
                     posDroite.y = listeFerme[(listeFerme.Count) - 1].y;
 
+                    // Si il y a un adversaire à droite
                     if (!existeDansListe(posDroite, listeOuverte))
                     {
+                        Console.Out.WriteLine("PosDroite existe pas");
                         listeOuverte.Add(posDroite);
                         tableDistance[posDroite.x][posDroite.y][0] = tableDistance[listeFerme[(listeFerme.Count) - 1].x][listeFerme[(listeFerme.Count) - 1].y][0] + 1;
                         tableDistance[posDroite.x][posDroite.y][1] = (int)getDistanceReelle(posDroite, posDestination);
@@ -182,8 +186,10 @@ namespace vindinium
                     }
                     else
                     {
+                        Console.Out.WriteLine("PosDroite existe");
                         if (tableDistance[posDroite.x][posDroite.y][0] >= tableDistance[listeFerme[(listeFerme.Count) - 1].x][listeFerme[(listeFerme.Count) - 1].y][0])
                         {
+                            Console.Out.WriteLine("Test Mwahahaha");
                             tableDistance[posDroite.x][posDroite.y][0] = tableDistance[listeFerme[(listeFerme.Count) - 1].x][listeFerme[(listeFerme.Count) - 1].y][0];
                             tableParent[posDroite.x][posDroite.y][0] = listeFerme[(listeFerme.Count) - 1].x;
                             tableParent[posDroite.x][posDroite.y][0] = listeFerme[(listeFerme.Count) - 1].y;
@@ -191,15 +197,16 @@ namespace vindinium
                     }     
                 }
 
+                Console.Out.WriteLine((serverStuff.board[listeFerme[(listeFerme.Count) - 1].x - 1][listeFerme[(listeFerme.Count) - 1].y]) == Tile.IMPASSABLE_WOOD);
                 if (serverStuff.board[listeFerme[(listeFerme.Count) - 1].x - 1][listeFerme[(listeFerme.Count) - 1].y] != Tile.IMPASSABLE_WOOD)
                 {
                     Pos posGauche = new Pos();
                     posGauche.x = listeFerme[(listeFerme.Count) - 1].x - 1;
                     posGauche.y = listeFerme[(listeFerme.Count) - 1].y;
-
+                    bool test = existeDansListe(posGauche, listeOuverte);
                     if (!existeDansListe(posGauche, listeOuverte))
                     {
-                        listeOuverte.Add(posGauche);
+                       listeOuverte.Add(posGauche);
                         tableDistance[posGauche.x][posGauche.y][0] = tableDistance[listeFerme[(listeFerme.Count) - 1].x][listeFerme[(listeFerme.Count) - 1].y][0] + 1;
                         tableDistance[posGauche.x][posGauche.y][1] = (int)getDistanceReelle(posGauche, posDestination);
                         tableParent[posGauche.x][posGauche.y][0] = listeFerme[(listeFerme.Count) - 1].x;
@@ -215,15 +222,17 @@ namespace vindinium
                         }
                     }
                 }
-
+            
                 if (serverStuff.board[listeFerme[(listeFerme.Count) - 1].x][listeFerme[(listeFerme.Count) - 1].y + 1] != Tile.IMPASSABLE_WOOD)
                 {
+                 
                     Pos posHaut = new Pos();
                     posHaut.x = listeFerme[(listeFerme.Count) - 1].x;
                     posHaut.y = listeFerme[(listeFerme.Count) - 1].y + 1;
 
                     if (!existeDansListe(posHaut, listeOuverte))
                     {
+                    
                         listeOuverte.Add(posHaut);
                         tableDistance[posHaut.x][posHaut.y][0] = tableDistance[listeFerme[(listeFerme.Count) - 1].x][listeFerme[(listeFerme.Count) - 1].y][0] + 1;
                         tableDistance[posHaut.x][posHaut.y][1] = (int)getDistanceReelle(posHaut, posDestination);
@@ -240,16 +249,17 @@ namespace vindinium
                         }
                     }
 
-                }
+                } 
 
-                if (serverStuff.board[listeFerme[(listeFerme.Count) - 1].x][listeFerme[(listeFerme.Count) - 1].y - 1] != Tile.IMPASSABLE_WOOD)
+                if (serverStuff.board[listeFerme[(listeFerme.Count) - 1].x][listeFerme[(listeFerme.Count) - 1].y] != Tile.IMPASSABLE_WOOD)
                 {
                     Pos posBas = new Pos();
                     posBas.x = listeFerme[(listeFerme.Count) - 1].x;
                     posBas.y = listeFerme[(listeFerme.Count) - 1].y - 1;
-
+                    Console.Out.WriteLine("Youpi");
                     if (!existeDansListe(posBas, listeOuverte))
                     {
+                        Console.Out.WriteLine("Salade");
                         listeOuverte.Add(posBas);
                         tableDistance[posBas.x][posBas.y][0] = tableDistance[listeFerme[(listeFerme.Count) - 1].x][listeFerme[(listeFerme.Count) - 1].y][0] + 1;
                         tableDistance[posBas.x][posBas.y][1] = (int)getDistanceReelle(posBas, posDestination);
@@ -258,6 +268,7 @@ namespace vindinium
                     }
                     else
                     {
+                        Console.Out.WriteLine("Tes6");
                         if (tableDistance[posBas.x][posBas.y][0] >= tableDistance[listeFerme[(listeFerme.Count) - 1].x][listeFerme[(listeFerme.Count) - 1].y][0])
                         {
                             tableDistance[posBas.x][posBas.y][0] = tableDistance[listeFerme[(listeFerme.Count) - 1].x][listeFerme[(listeFerme.Count) - 1].y][0];
@@ -265,14 +276,18 @@ namespace vindinium
                             tableParent[posBas.x][posBas.y][0] = listeFerme[(listeFerme.Count) - 1].y;
                         }
                     }
-
-                }           
+                }
+                if ((listeOuverte.Count != 0) && (listeFerme[(listeFerme.Count) - 1].x == posDestination.x) && (listeFerme[(listeFerme.Count) - 1].y == posDestination.y))
+                    continu = false;
+                continu = false;
+               // Console.Out.WriteLine("Test8");
             }
 
             bool finish = false;
-            List<String> deplacement = new List<String>();
+            List<string> deplacement = new List<string>();
             Pos posEnfant = posDestination; 
             Pos posParent = new Pos();
+
             while (finish == false)
             {
                 posParent.x = tableParent[posEnfant.x][posEnfant.y][0];
@@ -280,18 +295,18 @@ namespace vindinium
 
                 if (posParent.x == posEnfant.x && posParent.y > posEnfant.y)
                 { // parent au dessus de l'enfant --> déplacement vers le bas
-                    deplacement.Add(Direction.South);
+                    deplacement.Add("Direction.South");
                 }
                 else if (posParent.x == posEnfant.x && posParent.y < posEnfant.y)
                 { // parent en dessous de l'enfant --> déplacement vers la haut
-                    deplacement.Add(Direction.North);
+                    deplacement.Add("Direction.North");
                 }
                 else if (posParent.x < posEnfant.x && posParent.y == posEnfant.y)
                 { // parent à gauche de l'enfant --> déplacement vers la droite
-                    deplacement.Add(Direction.East);
+                    deplacement.Add("Direction.East");
                 }
                 else{ // parent à droite de l'enfant --> déplacement vers la gauche
-                    deplacement.Add(Direction.West);
+                    deplacement.Add("Direction.West");
                 }
 
                 if (posParent.x == posHero.x && posParent.y == posHero.y)
@@ -303,8 +318,6 @@ namespace vindinium
                     posParent.x = posEnfant.x;
                     posParent.y = posEnfant.y;
                 }
-
-                
             }
             deplacement.Reverse();
             return deplacement;
@@ -316,8 +329,11 @@ namespace vindinium
             bool found = false;
             int i = 0;
             while ((i < listeOuverte.Count) && (found == false))
+            {
                 if ((listeOuverte[i].x == point.x) && (listeOuverte[i].y == point.y))
                     found = true;
+                i++;
+            }
             return found;
         }
 
@@ -326,7 +342,6 @@ namespace vindinium
         {
             int index = 0;
             int minF = Int32.MaxValue;
-
 
             for (int i = 0; i < listeOuverte.Count; i++)
             {
