@@ -50,66 +50,104 @@ namespace vindinium
                 }).Start();
             }
 
-            // La variable deplacement correspond au deplacement de notre hero durant notre tour
-            string deplacement = Direction.Stay;
-            // Suite Deplacement est la liste des déplacement d'un hero vers son objectif
-            List<string> SuiteDeplacement = new List<string>();
+            while (serverStuff.finished == false && serverStuff.errored == false)
+            {
+                // la variable deplacement correspond au deplacement de notre hero durant notre tour
+                string deplacement = Direction.Stay;
+                // suite deplacement est la liste des déplacement d'un hero vers son objectif
+                List<string> suitedeplacement = new List<string>();
 
-            // Si il n'y a pas d'ennemis autour de notre hero
-            if(EnnemisACoté() == null){
-                ContinuFuir = false;
-                if(Continu == false){
-                    // Si la vie du hero est supérieure ou égale à 40, on va chercher la mine la plus proche
-                    if (serverStuff.myHero.life >= 40)
-                  {
-                        initMines();
-                        SuiteDeplacement = AStar(serverStuff.myHero.pos, minesDispo[0]);
-                        deplacement = SuiteDeplacement[0];
-                    }
-                    // Si la vie est inférieure à 40, on va se bourrer la gueule
-                    else
-                   {
-                        initBieres();
-                        SuiteDeplacement = AStar(serverStuff.myHero.pos, bieresDispo[0]);
-                        deplacement = SuiteDeplacement[0];
-                    }
-               }else{
-                       SuiteDeplacement.RemoveAt(0);
-                       deplacement = SuiteDeplacement[0];   
-               }
-            }
-           else{
-                // Si la vie du héro est supérieur ou égale à 80, on va taper l'adversaire
-                if(serverStuff.myHero.life >= 80){
-                        SuiteDeplacement = AStar(serverStuff.myHero.pos, EnnemisACoté());
-                        deplacement = SuiteDeplacement[0];
-                }
-                // Sinon, on fuit vers la bière la plus proche
-                else{
-                    if(!ContinuFuir){
-                        initBieres();
-                        SuiteDeplacement = AStar(serverStuff.myHero.pos, bieresDispo[0]);
-                        deplacement = SuiteDeplacement[0];
+                // si il n'y a pas d'ennemis autour de notre hero
+                if (EnnemisACoté() == null)
+                {
+                    Console.Out.WriteLine("personne à coté");
+                    ContinuFuir = false;
+                    if (Continu == false)
+                    {
+                        // si la vie du hero est supérieure ou égale à 40, on va chercher la mine la plus proche
+                        if (serverStuff.myHero.life >= 40)
+                        {
+                            InitMines();
+                            Console.Out.WriteLine("recherche mines");
+                            suitedeplacement = AStar(serverStuff.myHero.pos, minesDispo[0]);
+                            Console.Out.WriteLine(suitedeplacement[0]);
+                            deplacement = suitedeplacement[0];
+                            suitedeplacement.RemoveAt(0);
+                        }
+                        // si la vie est inférieure à 40, on va se bourrer la gueule
+                        else
+                        {
+                            Console.Out.WriteLine("recherche bière");
+                            initBieres();
+                            
+                            suitedeplacement = AStar(serverStuff.myHero.pos, bieresDispo[0]);
+                            Console.Out.WriteLine(suitedeplacement[0]);
+                            deplacement = suitedeplacement[0];
+                            suitedeplacement.RemoveAt(0);
+                            Console.Out.WriteLine(deplacement);
+                        }
+                        Continu = true;
                     }
                     else
                     {
-                        SuiteDeplacement.RemoveAt(0);
-                        deplacement = SuiteDeplacement[0]; 
+                        Console.Out.WriteLine("bouge");
+                        if (suitedeplacement.Count != 0)
+                        {
+                            deplacement = suitedeplacement[0];
+                            suitedeplacement.RemoveAt(0);
+                        }
+                      
                     }
+                    if (suitedeplacement.Count == 0)
+                        Continu = false;
                 }
-               
-            }
-           
-            // On bouge le héro
-            Continu = true;
-            ContinuFuir = true;
-            serverStuff.moveHero(deplacement);
+                else
+                {
+                    Console.Out.WriteLine("ennemis en vue");
+                    // si la vie du héro est supérieur ou égale à 80, on va taper l'adversaire
+                    if (serverStuff.myHero.life >= 80)
+                    {
+                        Console.Out.WriteLine("baston");
+                        suitedeplacement = AStar(serverStuff.myHero.pos, EnnemisACoté());
+                        deplacement = suitedeplacement[0];
+                        suitedeplacement.RemoveAt(0);
+                        ContinuFuir = false;
+                    }
+                    // sinon, on fuit vers la bière la plus proche
+                    else
+                    {
+                        if (!ContinuFuir)
+                        {
+                            initBieres();
+                            suitedeplacement = AStar(serverStuff.myHero.pos, bieresDispo[0]);
+                            deplacement = suitedeplacement[0];
+                            suitedeplacement.RemoveAt(0);
+                            ContinuFuir = true;
+                        }
+                        else
+                        {
+                            if (suitedeplacement.Count != 0)
+                            {
+                                deplacement = suitedeplacement[0];
+                                suitedeplacement.RemoveAt(0);
+                            }
+                        }
+                    }
+                    if (suitedeplacement.Count == 0)
+                        ContinuFuir = false;
+                }
 
-            if (serverStuff.errored)
-            {
-                Console.Out.WriteLine("error: " + serverStuff.errorText);
-            }
+               //  on bouge le héro
+ 
+                //Console.Out.WriteLine(deplacement);
+                serverStuff.moveHero(deplacement);
+            
 
+                if (serverStuff.errored)
+                {
+                    Console.Out.WriteLine("error: " + serverStuff.errorText);
+                }
+            }
             Console.Out.WriteLine("Poly_morphisme a fini");
         }
 
@@ -117,10 +155,9 @@ namespace vindinium
         // Retourne l'ennemis à coté si il existe
         public Pos EnnemisACoté()
         {
-            Console.Out.WriteLine("ID : "+serverStuff.myHero.id);
             for(int i = 1 ; i < 5 ; i++){
-                Console.Out.WriteLine(i);
-                Console.Out.WriteLine(Math.Abs(serverStuff.myHero.pos.x - serverStuff.heroes[i - 1].pos.x + serverStuff.myHero.pos.y - serverStuff.heroes[i - 1].pos.y));
+                //Console.Out.WriteLine(i);
+                //Console.Out.WriteLine(Math.Abs(serverStuff.myHero.pos.x - serverStuff.heroes[i - 1].pos.x + serverStuff.myHero.pos.y - serverStuff.heroes[i - 1].pos.y));
                 if ((i != serverStuff.myHero.id) && ((Math.Abs(serverStuff.myHero.pos.x - serverStuff.heroes[i-1].pos.x + serverStuff.myHero.pos.y - serverStuff.heroes[i-1].pos.y)) <= 2))
                 {
                     return serverStuff.heroes[i].pos;
@@ -137,22 +174,22 @@ namespace vindinium
             Pos posEnCours = new Pos();
             int index;
             bool continu = true;
-            int[][][] tableParent = new int[100][][];
-            int[][][] tableDistance = new int[100][][] ;
-           
+            int[][][] tableParent = new int[serverStuff.board.Length][][];
+            int[][][] tableDistance = new int[serverStuff.board.Length][][];
+
             for (int i = 0; i < serverStuff.board.Length; i++)
             {
-                tableDistance[i] = new int[100][];
-                tableParent[i] = new int[100][];
+                tableDistance[i] = new int[serverStuff.board.Length][];
+                tableParent[i] = new int[serverStuff.board.Length][];
 
-                for (int j = 0; j < serverStuff.board.Length +2 ; j++)
+                for (int j = 0; j < serverStuff.board.Length; j++)
                 {
                     tableDistance[i][j] = new int[2];
                     tableParent[i][j] = new int[2];
 
                     for (int k = 0; k < 2; k++)
                     {
-                        tableDistance[i][j][k] = 9999;
+                        tableDistance[i][j][k] = 0;
                     }
                 }
             }
@@ -171,8 +208,11 @@ namespace vindinium
                 index = retournerPlusPetitNoeud(listeOuverte, tableDistance);
                 listeFerme.Add(listeOuverte[index]);
                 listeOuverte.RemoveAt(index);
-                Console.Out.WriteLine("Taille jeux :" +serverStuff.board.Length);
-                Console.Out.WriteLine("Taille Tableau :" + listeFerme[(listeFerme.Count) - 1].x + "Et " + listeFerme[(listeFerme.Count) - 1].y);
+               
+               
+
+                //Console.Out.WriteLine("Taille jeux :" +serverStuff.board.Length);
+                //Console.Out.WriteLine("Taille Tableau :" + listeFerme[(listeFerme.Count) - 1].x + "Et " + listeFerme[(listeFerme.Count) - 1].y);
                 // On regarde si on à des arbre
                 for (int X = -1; X < 2; X++)
                 {
@@ -182,47 +222,49 @@ namespace vindinium
                         {
 
                             // On vérifie qu'il existe un arbre à côté de notre héro
-                            if ((listeFerme[(listeFerme.Count) - 1].x + X + 1 != serverStuff.board.Length) || (listeFerme[(listeFerme.Count) - 1].x + X - 1 != 0) ||
-                                (listeFerme[(listeFerme.Count) - 1].y + Y + 1 != serverStuff.board.Length) || (listeFerme[(listeFerme.Count) - 1].y + Y - 1 != 0) ||
-                                (serverStuff.board[listeFerme[(listeFerme.Count) - 1].x + X][listeFerme[(listeFerme.Count) - 1].y + Y] != Tile.IMPASSABLE_WOOD))
+                            if (((listeFerme[(listeFerme.Count) - 1].x + X  < serverStuff.board.Length) && (listeFerme[(listeFerme.Count) - 1].x + X  >= 0) &&
+                                (listeFerme[(listeFerme.Count) - 1].y + Y < serverStuff.board.Length) && (listeFerme[(listeFerme.Count) - 1].y + Y >= 0)))
                             {
-                                Pos posIntermediaire = new Pos();
-                                posIntermediaire.x = listeFerme[(listeFerme.Count) - 1].x + X;
-                                posIntermediaire.y = listeFerme[(listeFerme.Count) - 1].y + Y;
-
-                                // Si il n'existe pas dans la liste, on va le faire
-                                if (!existeDansListe(posIntermediaire, listeOuverte, listeFerme))
+                                 if(serverStuff.board[listeFerme[(listeFerme.Count) - 1].x + X][listeFerme[(listeFerme.Count) - 1].y + Y] != Tile.IMPASSABLE_WOOD)
                                 {
-                                    listeOuverte.Add(posIntermediaire);
-                                    // On va incrémenter la valeur réelle de notre distance par rapport à celle de notre héro
-                                    tableDistance[posIntermediaire.x][posIntermediaire.y][0] = tableDistance[listeFerme[(listeFerme.Count) - 1].x][listeFerme[(listeFerme.Count) - 1].y][0] + 1;
-                                    // On rajoute 1 à la valeur de distance concernant notre objet par rapport à la destination
-                                    tableDistance[posIntermediaire.x][posIntermediaire.y][1] = (int)getDistanceReelle(posIntermediaire, posDestination);
+                                    Pos posIntermediaire = new Pos();
+                                    posIntermediaire.x = listeFerme[(listeFerme.Count) - 1].x + X;
+                                    posIntermediaire.y = listeFerme[(listeFerme.Count) - 1].y + Y;
 
-                                    // On initialise la table parent entrant les coordonées de notre héro en x et y
-                                    tableParent[posIntermediaire.x][posIntermediaire.y][0] = listeFerme[(listeFerme.Count) - 1].x;
-                                    tableParent[posIntermediaire.x][posIntermediaire.y][0] = listeFerme[(listeFerme.Count) - 1].y;
-                                }
-                                else
-                                {
-                                    // Si, on rencontre un arbre, on vérifie s'il la distance est meilleur en passant par un point précis, dans ce cas on réinitialise la table distance
-                                    if (tableDistance[posIntermediaire.x][posIntermediaire.y][0] >= tableDistance[listeFerme[(listeFerme.Count) - 1].x][listeFerme[(listeFerme.Count) - 1].y][0])
+                                    // Si il n'existe pas dans la liste, on va le faire
+                                    if (!existeDansListe(posIntermediaire, listeOuverte, listeFerme))
                                     {
-                                        tableDistance[posIntermediaire.x][posIntermediaire.y][0] = tableDistance[listeFerme[(listeFerme.Count) - 1].x][listeFerme[(listeFerme.Count) - 1].y][0];
+                                        listeOuverte.Add(posIntermediaire);
+                                        // On va incrémenter la valeur réelle de notre distance par rapport à celle de notre héro
+                                        tableDistance[posIntermediaire.x][posIntermediaire.y][0] = tableDistance[listeFerme[(listeFerme.Count) - 1].x][listeFerme[(listeFerme.Count) - 1].y][0] + 1;
+                                        // On rajOute 1 à la valeur de distance concernant notre objet par rapport à la destination
+                                        tableDistance[posIntermediaire.x][posIntermediaire.y][1] = (int)getDistanceReelle(posIntermediaire, posDestination);
+
+                                        // On initialise la table parent entrant les coordonées de notre héro en x et y
                                         tableParent[posIntermediaire.x][posIntermediaire.y][0] = listeFerme[(listeFerme.Count) - 1].x;
                                         tableParent[posIntermediaire.x][posIntermediaire.y][0] = listeFerme[(listeFerme.Count) - 1].y;
+                                    }
+                                    else
+                                    {
+                                        // Si, on rencontre un arbre, on vérifie s'il la distance est meilleur en passant par un point précis, dans ce cas on réinitialise la table distance
+                                        if (tableDistance[posIntermediaire.x][posIntermediaire.y][0] >= tableDistance[listeFerme[(listeFerme.Count) - 1].x][listeFerme[(listeFerme.Count) - 1].y][0])
+                                        {
+                                            tableDistance[posIntermediaire.x][posIntermediaire.y][0] = tableDistance[listeFerme[(listeFerme.Count) - 1].x][listeFerme[(listeFerme.Count) - 1].y][0];
+                                            tableParent[posIntermediaire.x][posIntermediaire.y][0] = listeFerme[(listeFerme.Count) - 1].x;
+                                            tableParent[posIntermediaire.x][posIntermediaire.y][0] = listeFerme[(listeFerme.Count) - 1].y;
+                                        }
                                     }
                                 }
                             }
                         }
                     }
+                    if (((listeFerme[(listeFerme.Count) - 1].x == posDestination.x) && (listeFerme[(listeFerme.Count) - 1].y == posDestination.y))|| (listeOuverte.Count == 0))
+                        continu = false;
                 }
-
-                if ( (listeFerme[(listeFerme.Count) - 1].x == posDestination.x) && (listeFerme[(listeFerme.Count) - 1].y == posDestination.y))
-                    continu = false;
             }
-            Console.Out.WriteLine("c'est passé YOUHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHh");
-
+            //Console.Out.WriteLine("c'est passé YOUHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHh");
+            listeFerme.Clear();
+            listeOuverte.Clear();
             bool finish = false;
             List<string> deplacement = new List<string>();
             Pos posEnfant = posDestination; 
@@ -236,30 +278,31 @@ namespace vindinium
 
                 if (posParent.x == posEnfant.x && posParent.y > posEnfant.y)
                 { // parent au dessus de l'enfant --> déplacement vers le bas
-                    deplacement.Add("Direction.South");
+                    deplacement.Add(Direction.West); 
                 }
                 else if (posParent.x == posEnfant.x && posParent.y < posEnfant.y)
                 { // parent en dessous de l'enfant --> déplacement vers la haut
-                    deplacement.Add("Direction.North");
+                    deplacement.Add(Direction.East);
                 }
                 else if (posParent.x < posEnfant.x && posParent.y == posEnfant.y)
                 { // parent à gauche de l'enfant --> déplacement vers la droite
-                    deplacement.Add("Direction.East");
+                    deplacement.Add(Direction.North); 
                 }
                 else{ // parent à droite de l'enfant --> déplacement vers la gauche
-                    deplacement.Add("Direction.West");
+                    deplacement.Add(Direction.South);
                 }
 
                 if (posParent.x == posHero.x && posParent.y == posHero.y)
                 {
                     finish = true;
+
                 }
                 else
                 {
                     posParent.x = posEnfant.x;
                     posParent.y = posEnfant.y;
                 }
-                //finish = true;
+                finish = true;
             }
             deplacement.Reverse();
             return deplacement;
@@ -282,7 +325,7 @@ namespace vindinium
                 i++;
             }
             // On vérifie dans la liste fermée (position traitée)
-            while ((i < listeOuverte.Count) && (found == false) && ((j < listeFerme.Count)))
+            while ((found == false) && ((j < listeFerme.Count)))
             {
                 if((listeFerme[j].x == point.x) && (listeFerme[j].y == point.y))
                     found = true;
@@ -300,24 +343,26 @@ namespace vindinium
 
             for (int i = 0; i < listeOuverte.Count; i++)
             {
-                if(tableDistance[listeOuverte[i].x][listeOuverte[i].y][0] + tableDistance[listeOuverte[i].x][listeOuverte[i].y][1]  < minF){
+                if(tableDistance[listeOuverte[i].x][listeOuverte[i].y][0] + tableDistance[listeOuverte[i].x][listeOuverte[i].y][1]  < minF)
+                {
                     minF = tableDistance[listeOuverte[i].x][listeOuverte[i].y][0] + tableDistance[listeOuverte[i].x][listeOuverte[i].y][1];
                     index = i;
+                    //Console.Out.WriteLine("L'index : "+ i +" de valeur ["+ listeOuverte[i].x + " , "+listeOuverte[i].y +"]");
                 }
             }
-            return index;
+            return index;       
         }
 
         // Fonction qui fait la distance euclidienne
         public double getDistanceReelle(Pos posCourante, Pos arrive)
         {
-            return arrive.x - posCourante.x + arrive.y - posCourante.y;
+            return Math.Abs(arrive.x - posCourante.x + arrive.y - posCourante.y);
         }
 
          // Fonction qui initialise une liste des mines triées  par rapport à la distance à notre héro
-         public void initMines(){
-             this.minesDispo.Clear();
-             this.nbMinesDispo = 0;
+         public void InitMines(){
+             minesDispo.Clear();
+             nbMinesDispo = 0;
              Pos objetTrouve = new Pos();
 
              if (serverStuff.myHero.id == 1)
@@ -331,7 +376,7 @@ namespace vindinium
                              serverStuff.board[i][j] == Tile.GOLD_MINE_3 ||
                              serverStuff.board[i][j] == Tile.GOLD_MINE_4 )
                          {
-                             this.nbMinesDispo++;
+                             nbMinesDispo++;
                              objetTrouve.x = i;
                              objetTrouve.y = j;
                              minesDispo.Add(objetTrouve);
